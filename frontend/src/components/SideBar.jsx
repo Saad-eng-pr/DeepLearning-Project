@@ -18,7 +18,7 @@ const SideBar = () => {
         <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark} alt="logo" className='w-full max-w-48'/>
 
         {/* New chat button */}
-        <button className='flex justify-center items-center w-full py-2 mt-10 text-white bg-linear-to-r from-[#A456F7] to-[#3D81F6] text-sm border border-gray-400 rounded-md '>
+        <button className='flex justify-center items-center w-full py-2 mt-10 text-white bg-linear-to-r from-[#242a81] to-[#204AC2] text-sm border border-gray-400/30 rounded-md '>
           <span className='mr-2 text-xl'>+</span> New Chat
         </button>
 
@@ -58,7 +58,7 @@ const SideBar = () => {
              type="checkbox" className='sr-only peer' checked={theme === 'dark'}
             />
 
-            <div className='w-9 h-5 bg-gray-400 rounded-full peer-checked:bg-purple-600 transition-all'></div>
+            <div className='w-9 h-5 bg-gray-400 rounded-full peer-checked:bg-[#1E257D] transition-all'></div>
             <span className='absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-all peer-checked:translate-x-4 '></span>
           </label>
         </div>
