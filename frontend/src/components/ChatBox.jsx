@@ -7,6 +7,7 @@ import { sendMessage } from "../api/chatApi";
 
 const ChatBox = () => {
   const containerRef = useRef(null);  
+  const bottomRef = useRef(null);
 
   const {selectedChat, theme} = useAppContext();
   const [messages, setMessages] = useState([]);
@@ -38,12 +39,12 @@ const ChatBox = () => {
     };
 
     setMessages((prev) => [...prev, aiMessage]);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
-  }
-}; 
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }; 
 
   useEffect(() => {
     if(selectedChat) {
@@ -51,12 +52,18 @@ const ChatBox = () => {
     }
   }, [selectedChat])
 
+  // Scrolls to last message (if there are any) when chat opened 
+  // useEffect(() => {
+  //   containerRef.current?.scrollTo({
+  //     top: containerRef.current.scrollHeight,
+  //     behavior: "smooth",
+  //   })
+  // }, messages)
+
+  // Scrolls to the last message when using the chat
   useEffect(() => {
-    containerRef.current?.scrollTo({
-      top: containerRef.current.scrollHeight,
-      behavior: "smooth",
-    })
-  }, messages)
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
   
   return (
     <div className='flex-1 flex flex-col justify-between m-5 md:m-10 xl-pr-40'>
@@ -73,6 +80,8 @@ const ChatBox = () => {
         {messages.map((message, index) => (
           <Message key={index} message={message}/>
         ))}
+
+        <div ref={bottomRef} />
         
         {/* Three dots loading */}
         {

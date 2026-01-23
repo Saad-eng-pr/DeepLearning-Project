@@ -8,6 +8,7 @@ const Message = ({message}) => {
   useEffect(() => {
     Prism.highlightAll();
   }, [message.content])
+  
   return (
     <div>
       {message.role === 'user' ? (
