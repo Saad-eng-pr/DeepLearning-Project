@@ -19,7 +19,7 @@ const ChatBox = () => {
   const onSubmit = async (e) => {
   e.preventDefault();
 
-  if (!prompt || !selectedChat) return;
+  if (!prompt) return;
 
   const userMessage = {
     role: "user",
