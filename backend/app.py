@@ -4,7 +4,7 @@ from flask_login import LoginManager
 from models import User
 from routes.user_routes import user_bp
 from extensions import db, bcrypt, login_manager
-
+from routes.auth_routes import auth_bp
 
 
 def create_app():
@@ -20,6 +20,8 @@ def create_app():
     login_manager.init_app(app)
 
     app.register_blueprint(user_bp)
+    app.register_blueprint(auth_bp)
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
