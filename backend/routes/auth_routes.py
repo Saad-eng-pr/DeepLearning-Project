@@ -39,7 +39,7 @@ def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
 
-# Current authenticated user
+# Current authenticated user endpoint
 @auth_bp.route("/me", methods=["GET"])
 def me():
     if not current_user.is_authenticated:

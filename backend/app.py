@@ -5,6 +5,8 @@ from models import User
 from routes.user_routes import user_bp
 from extensions import db, bcrypt, login_manager
 from routes.auth_routes import auth_bp
+from routes.chat_routes import chat_bp
+from routes.message_routes import message_bp
 
 
 def create_app():
@@ -21,6 +23,8 @@ def create_app():
 
     app.register_blueprint(user_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(chat_bp)
+    app.register_blueprint(message_bp)
 
     @login_manager.user_loader
     def load_user(user_id):
