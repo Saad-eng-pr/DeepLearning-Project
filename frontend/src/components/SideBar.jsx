@@ -3,10 +3,11 @@ import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets';
 import { useState } from 'react';
 import moment from 'moment'; 
+import { logoutUser } from '../api/userApi';
 
 const SideBar = () => {
 
-  const {chats, selectedChat, setSelectedChat, theme, setTheme, user, navigate} = useAppContext();
+  const {chats, selectedChat, setSelectedChat, theme, setTheme, user, setUser, navigate} = useAppContext();
 
   const [search, setSearch] = useState('');
 
@@ -66,9 +67,31 @@ const SideBar = () => {
         {/* User Account */}
         <div className='flex items-center justify-between mt-4 gap-3 p-2 border border-gray-300 rounded-md dark:border-white/15 group cursor-pointer'>
           <img src={assets.user_icon} alt="userIcon" className='w-8 rounded-full' />
-          <p className='flex-1 text-sm truncate dark:text-primary'>{user ? user.name : 'Login to your account'}</p>
+          <p className='flex-1 text-sm truncate dark:text-primary'>{user ? user.username : 'Login to your account'}</p>
         
-          { user && <img src={assets.logout_icon} alt="logout" className='h-5 hidden group-hover:block cursor-pointer not-dark:invert ' /> }
+          {user && (
+            <img 
+              src={assets.logout_icon} 
+              alt="logout" 
+              className='h-5 hidden group-hover:block cursor-pointer not-dark:invert'
+              onClick={async () => {
+                try {
+                  const data = await logoutUser();
+                  if (data.message) {
+                    setUser(null);
+                    navigate("/login");
+                  } else if (data.error) {
+                    console.error(data.error);
+                    alert("Logout failed");
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert("Logout failed");
+                }
+              }}
+            />
+          )}
+
         </div>
 
     </div>

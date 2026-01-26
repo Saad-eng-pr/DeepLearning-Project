@@ -11,7 +11,12 @@ from routes.message_routes import message_bp
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    
+    CORS(
+    app,
+    supports_credentials=True,          # << permet l'envoi de cookies
+    origins=["http://localhost:5173"]  
+    )
 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

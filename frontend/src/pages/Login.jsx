@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-
+import { loginUser, registerUser } from "../api/userApi";
+import { useAppContext } from '../context/AppContext'
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -7,9 +8,30 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const { setUser, navigate } = useAppContext();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  } 
+    try {
+      let data;
+      if (state === "login") {
+        data = await loginUser(email, password);
+      } else {
+        data = await registerUser(name, email, password);
+      }
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      setUser(data.user); // stocker l'utilisateur dans le context
+      navigate("/"); // rediriger vers la page principale
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className='flex flex-col mt-12 gap-4 m-auto items-start p-8 py-12 w-80 sm:w-88 text-gray-500 rounded-lg shadow-xl border border-gray-200 bg-white'>

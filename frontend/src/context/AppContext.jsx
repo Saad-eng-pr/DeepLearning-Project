@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyChats, dummyUserData } from "../assets/assets";
+import { getCurrentUser } from "../api/userApi";
 
 
 const AppContext = createContext()
@@ -17,8 +18,18 @@ export const AppContextProvider = ({children}) => {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
     const fetchUser = async () => {
-        setUser(dummyUserData)
+    try {
+        const data = await getCurrentUser();
+        if (data.user) {
+        setUser(data.user);
+        } else {
+        setUser(null);
+        }
+    } catch (err) {
+        console.error(err);
+        setUser(null);
     }
+    };
 
     useEffect(() => {
         fetchUser()
