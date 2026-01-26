@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyChats, dummyUserData } from "../assets/assets";
 import { getCurrentUser } from "../api/userApi";
+import { fetchChats } from "../api/chatApi";
 
 
 const AppContext = createContext()
@@ -36,9 +37,16 @@ export const AppContextProvider = ({children}) => {
     }, [] )
     
     const fetchUserChats = async () => {
-        setChats(dummyChats);
-        setSelectedChat();
-    }
+        if (!user) return;
+
+        try {
+            const data = await fetchChats();
+            setChats(data); // data est un tableau de chats
+            setSelectedChat(data[0] || null); // sélectionner le premier chat automatiquement
+        } catch (err) {
+            console.error("Error fetching chats", err);
+        }
+    };
 
     useEffect(() => {
         if (user) {

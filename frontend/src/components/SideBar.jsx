@@ -4,6 +4,7 @@ import { assets } from '../assets/assets';
 import { useState } from 'react';
 import moment from 'moment'; 
 import { logoutUser } from '../api/userApi';
+import { createChat, fetchMessages } from "../api/chatApi";
 
 const SideBar = () => {
 
@@ -19,7 +20,20 @@ const SideBar = () => {
         <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark} alt="logo" className='w-full max-w-48'/>
 
         {/* New chat button */}
-        <button className='flex justify-center items-center w-full py-2 mt-10 text-white bg-linear-to-r from-[#242a81] to-[#204AC2] text-sm border border-gray-400/30 rounded-md '>
+        <button
+          className='flex justify-center items-center cursor-pointer w-full py-2 mt-10 text-white bg-linear-to-r from-[#242a81] to-[#204AC2] text-sm border border-gray-400/30 rounded-md '
+          onClick={async () => {
+            try {
+              const title = prompt("Enter chat title") || "New Chat";
+              const data = await createChat(title);
+              setChats((prev) => [data.chat, ...prev]);
+              setSelectedChat(data.chat); // sélectionner automatiquement le nouveau chat
+            } catch (err) {
+              console.error(err);
+              alert("Failed to create chat");
+            }
+          }}
+        >
           <span className='mr-2 text-xl'>+</span> New Chat
         </button>
 
@@ -31,20 +45,35 @@ const SideBar = () => {
 
         {/* Recent chats */}
         {chats.length > 0 && <p className='mt-4 text-sm'>Recent chats</p>}
-        <div className='flex-1 overflow-y-scroll mt-3 text-sm space-y-3' >
-          {
-            chats.filter((chat) => chat.messages[0] ? chat.messages[0]?.content.toLowerCase().includes(search.toLowerCase()) : 
-              chat.name.toLowerCase().includes(search.toLowerCase())).map((chat) => (
-                <div key={chat._id} className='p-1 px-4 border border-gray-300 rounded-md dark:border-[#80609F]/15 cursor-pointer flex justify-between group hover:bg-gray-100 hover:dark:bg-gray-900'>
-                  <div onClick={() => setSelectedChat(chat)}>
-                    <p className='truncate w-full'> {chat.messages.length > 0 ? chat.messages[0].content.slice(0,32) : chat.name } </p>
-                    <p className='text-xs text-gray-400 dark:text-[#B1A6C0]'> {moment(chat.updatedAt).fromNow()} </p>
-                  </div>
+        <div className='flex-1 overflow-y-scroll mt-3 text-sm space-y-3'>
+          {chats.map((chat) => (
+            <div
+              key={chat.id}
+              className='p-1 px-4 border border-gray-300 rounded-md dark:border-[#80609F]/15 cursor-pointer flex justify-between group hover:bg-gray-100 hover:dark:bg-gray-900'
+            >
+              <div onClick={async () => {
+                // Charger les messages du chat
+                const messages = await fetchMessages(chat.id);
+                setSelectedChat({ ...chat, messages });
+              }}>
+                <p className='truncate w-full'>{chat.title}</p>
+                <p className='text-xs text-gray-400 dark:text-[#B1A6C0]'>
+                  {chat.updated_at ? new Date(chat.updated_at).toLocaleString() : ""}
+                </p>
+              </div>
 
-                  <img src={assets.bin_icon} alt="bin" className='w-4 hidden group-hover:block cursor-pointer not-dark:invert'/>
-                </div>
-              ))
-          }
+              <img 
+                src={assets.bin_icon} 
+                alt="bin" 
+                className='w-4 hidden group-hover:block cursor-pointer not-dark:invert'
+                onClick={async () => {
+                  await deleteChat(chat.id);
+                  setChats((prev) => prev.filter(c => c.id !== chat.id));
+                  if (selectedChat?.id === chat.id) setSelectedChat(null);
+                }}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Dark mode toggle */}

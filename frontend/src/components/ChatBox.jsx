@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets';
 import Message from './Message';
-import { sendMessage } from "../api/chatApi";
+import { sendMessage, fetchMessages } from "../api/chatApi";
 
 
 const ChatBox = () => {
@@ -17,50 +17,37 @@ const ChatBox = () => {
 
 
   const onSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    if (!prompt) return;
 
-  if (!prompt) return;
+    setLoading(true);
+    setPrompt("");
 
-  const userMessage = {
-    role: "user",
-    content: prompt,
+    try {
+      const data = await sendMessage(prompt, selectedChat.id);
+
+      setMessages((prev) => [...prev, ...data.messages]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  setMessages((prev) => [...prev, userMessage]);
-  setPrompt("");
-  setLoading(true);
-
-  try {
-    const data = await sendMessage(prompt, selectedChat._id);
-
-    const aiMessage = {
-      role: "assistant",
-      content: data.reply,
-    };
-
-    setMessages((prev) => [...prev, aiMessage]);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }; 
 
   useEffect(() => {
-    if(selectedChat) {
-      setMessages(selectedChat.messages || [])
-    }
-  }, [selectedChat])
+    const loadMessages = async () => {
+      if (!selectedChat) return;
+      try {
+        const messages = await fetchMessages(selectedChat.id);
+        setMessages(messages);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadMessages();
+  }, [selectedChat]);
 
-  // Scrolls to last message (if there are any) when chat opened 
-  // useEffect(() => {
-  //   containerRef.current?.scrollTo({
-  //     top: containerRef.current.scrollHeight,
-  //     behavior: "smooth",
-  //   })
-  // }, messages)
-
-  // Scrolls to the last message when using the chat
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
