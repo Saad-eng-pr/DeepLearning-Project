@@ -9,24 +9,61 @@ const ChatBox = () => {
   const containerRef = useRef(null);  
   const bottomRef = useRef(null);
 
-  const {selectedChat, theme} = useAppContext();
+  const {selectedChat, theme, setSelectedChat, setChats} = useAppContext();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [mode, setMode] = useState('Text');
 
 
+  // const onSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!prompt) return;
+
+  //   setLoading(true);
+  //   setPrompt("");
+
+  //   try {
+  //     const data = await sendMessage(prompt, selectedChat.id);
+
+  //     setMessages((prev) => [...prev, ...data.messages]);
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!prompt) return;
+    if (!prompt || !selectedChat?.id) return;
 
-    setLoading(true);
+    const currentPrompt = prompt;
     setPrompt("");
+    setLoading(true);
 
     try {
-      const data = await sendMessage(prompt, selectedChat.id);
+      await sendMessage(currentPrompt, selectedChat.id);
 
-      setMessages((prev) => [...prev, ...data.messages]);
+      // ALWAYS refetch messages after sending
+      const updatedMessages = await fetchMessages(selectedChat.id);
+      setMessages(updatedMessages);
+
+      // First message → update title
+      if (selectedChat.title === "New Chat" && updatedMessages.length > 0) {
+        const newTitle = currentPrompt.split(" ").slice(0, 5).join(" ");
+
+        setSelectedChat((prev) => ({ ...prev, title: newTitle }));
+
+        setChats((prev) =>
+          prev.map((chat) =>
+            chat.id === selectedChat.id
+              ? { ...chat, title: newTitle }
+              : chat
+          )
+        );
+      }
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -36,37 +73,56 @@ const ChatBox = () => {
 
 
   useEffect(() => {
-    const loadMessages = async () => {
-      if (!selectedChat) return;
-      try {
-        const messages = await fetchMessages(selectedChat.id);
-        setMessages(messages);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    loadMessages();
-  }, [selectedChat]);
+  if (!selectedChat?.id) {
+    setMessages([]);
+    return;
+  }
+
+  const loadMessages = async () => {
+    const msgs = await fetchMessages(selectedChat.id);
+    setMessages(msgs);
+  };
+
+  loadMessages();
+}, [selectedChat?.id])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  if (!selectedChat) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-primary">
+        <img
+          src={theme === "dark" ? assets.logo_full : assets.logo_full_dark}
+          alt="logo"
+          className="w-full max-w-56"
+        />
+        <p className="mt-5 text-4xl sm:text-6xl text-center text-gray-400 dark:text-white">
+          Ask me anything.
+        </p>
+      </div>
+    );
+  }
+
   
   return (
     <div className='flex-1 flex flex-col justify-between m-5 md:m-10 xl-pr-40'>
       
       {/* Chat messages */}
       <div ref={containerRef} className='flex-1 mb-5 overflow-y-scroll'>
-        {messages.length === 0 && (
+        {messages.length === 0 ? (
           <div className='h-full flex flex-col items-center justify-center gap-2 text-primary'>
-            <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark}  alt="logo" className='w-full max-w-56 sm:max-w-68 '/>
-            <p className='mt-5 text-4xl sm:text-6xl text-center text-gray-400 dark:text-white '>Ask me anything.</p>
+            {!selectedChat || (selectedChat && selectedChat?.messages?.length > 0) ? null : (
+              <>
+                <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark}  alt="logo" className='w-full max-w-56 sm:max-w-68 '/>
+                <p className='mt-5 text-4xl sm:text-6xl text-center text-gray-400 dark:text-white'>Ask me anything.</p>
+              </>
+            )}
           </div>
+        ) : (
+          messages.map((message, index) => <Message key={index} message={message} />)
         )}
-
-        {messages.map((message, index) => (
-          <Message key={index} message={message}/>
-        ))}
 
         <div ref={bottomRef} />
         

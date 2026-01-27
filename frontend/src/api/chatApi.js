@@ -9,13 +9,16 @@ export const fetchChats = async () => {
   return res.json();
 };
 
-export const createChat = async (title) => {
-  const res = await fetch(`${API_URL}/chats/`, {
+export const createChat = async () => {
+  const res = await fetch("http://localhost:5000/api/chats/", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ title }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
+
+  if (!res.ok) throw new Error("Failed to create chat");
   return res.json();
 };
 

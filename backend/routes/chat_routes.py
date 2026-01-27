@@ -10,7 +10,7 @@ chat_bp = Blueprint("chats", __name__, url_prefix="/api/chats")
 @chat_bp.route("/", methods=["POST"])
 @login_required
 def create_chat():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     title = data.get("title", "New Chat")
 

@@ -4,11 +4,11 @@ import { assets } from '../assets/assets';
 import { useState } from 'react';
 import moment from 'moment'; 
 import { logoutUser } from '../api/userApi';
-import { createChat, fetchMessages } from "../api/chatApi";
+import { createChat, fetchMessages, deleteChat } from "../api/chatApi";
 
 const SideBar = () => {
 
-  const {chats, selectedChat, setSelectedChat, theme, setTheme, user, setUser, navigate} = useAppContext();
+  const {chats, selectedChat, setSelectedChat, theme, setTheme, user, setUser, navigate, setChats} = useAppContext();
 
   const [search, setSearch] = useState('');
 
@@ -20,7 +20,7 @@ const SideBar = () => {
         <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark} alt="logo" className='w-full max-w-48'/>
 
         {/* New chat button */}
-        <button
+        {/* <button
           className='flex justify-center items-center cursor-pointer w-full py-2 mt-10 text-white bg-linear-to-r from-[#242a81] to-[#204AC2] text-sm border border-gray-400/30 rounded-md '
           onClick={async () => {
             try {
@@ -31,6 +31,27 @@ const SideBar = () => {
             } catch (err) {
               console.error(err);
               alert("Failed to create chat");
+            }
+          }}
+        >
+          <span className='mr-2 text-xl'>+</span> New Chat
+        </button> */}
+        
+        <button
+          className='flex justify-center items-center w-full cursor-pointer py-2 mt-10 text-white bg-linear-to-r from-[#242a81] to-[#204AC2] text-sm border border-gray-400/30 rounded-md'
+          onClick={async () => {
+            try {
+              const data = await createChat();
+
+              const newChat = {
+                ...data.chat,
+                messages: []
+              };
+
+              setChats((prev) => [newChat, ...prev]);
+              setSelectedChat(newChat);
+            } catch (err) {
+              console.error(err);
             }
           }}
         >

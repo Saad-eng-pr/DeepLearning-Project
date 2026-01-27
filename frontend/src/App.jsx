@@ -28,7 +28,7 @@ const App = () => {
 
       </div>
     ) : (
-      <div className='dark:bg-linear-to-b from-[#242124] to-[#000000] dark:text-white'>
+      <div className='w-full min-h-screen flex justify-center items-center dark:bg-linear-to-b from-[#242124] to-[#000000] dark:text-white '>
         <Login />
       </div>
     )}

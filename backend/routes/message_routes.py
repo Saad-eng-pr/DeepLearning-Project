@@ -25,6 +25,11 @@ def send_message(chat_id):
     if not content:
         return jsonify({"error": "Message content required"}), 400
 
+    # Mettre à jour le titre si le chat n'a pas encore de messages
+    if len(chat.messages) == 0:
+        chat.title = " ".join(content.split()[:5])  # 5 premiers mots du prompt
+        db.session.commit()
+
     # Save user message
     user_message = Message(
         role="user",
@@ -33,32 +38,26 @@ def send_message(chat_id):
     )
     db.session.add(user_message)
 
-    # Mock AI response 
+    # Mock AI response
     ai_reply = f"The backend received your message: '{content}'"
-
     ai_message = Message(
         role="assistant",
         content=ai_reply,
         chat_id=chat.id
     )
     db.session.add(ai_message)
-
     db.session.commit()
 
     return jsonify({
         "reply": ai_reply,
         "messages": [
-            {
-                "id": user_message.id,
-                "role": user_message.role,
-                "content": user_message.content
-            },
-            {
-                "id": ai_message.id,
-                "role": ai_message.role,
-                "content": ai_message.content
-            }
-        ]
+            {"id": user_message.id, "role": user_message.role, "content": user_message.content},
+            {"id": ai_message.id, "role": ai_message.role, "content": ai_message.content}
+        ],
+        "chat": {
+            "id": chat.id,
+            "title": chat.title
+        }
     }), 201
 
 
