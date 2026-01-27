@@ -41,8 +41,8 @@ export const AppContextProvider = ({children}) => {
 
         try {
             const data = await fetchChats();
-            setChats(data); // data est un tableau de chats
-            setSelectedChat(data[0] || null); // sélectionner le premier chat automatiquement
+            setChats(data); 
+            setSelectedChat(null); 
         } catch (err) {
             console.error("Error fetching chats", err);
         }
